@@ -1,0 +1,323 @@
+<!DOCTYPE HTML>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>OpenSSL Self-signed Certificate Script Helper</title>
+</head>
+
+<body>
+    <h1>OpenSSL Self-signed Certificate Script Helper</h1>
+    <h3 id="jsprompt">Notice: this page uses JavaScript, please enable it.</h3>
+    <form id='input_form' name='input_form'>
+        <div>
+            <label for="openssl">Path for OpenSSL binary:</label>
+            <input type="text" class="KeyUpDownHandle" id="openssl" name="openssl" placeholder="openssl">
+        </div>
+
+        <div>
+            <label for="outform">Output format:</label>
+            <select class="ChangeHandle" id="outform" name="outform">
+                <option value="PEM">PEM</option>
+                <option value="DER">DER</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="days">Validity period (in days):</label>
+            <input type="number" class="KeyUpDownHandle" id="days" name="days" value=30>
+        </div>
+
+        <div>
+            <label for="ca">CA:</label>
+            <select class="ChangeHandle" id="ca" name="ca">
+                <option value="new">Sign a new CA cert</option>
+                <option value="existed">Use an existed CA cert</option>
+            </select>
+            <div id="ca_new">
+                <label for="ca_CN">commonName for CA:</label>
+                <input type="text" class="KeyUpDownHandle" id="ca_CN" name="ca_CN" placeholder="MyCA">
+            </div>
+            <div id="ca_existed" style="display: none;">
+                <label for="ca_certpath">Cert Path:</label>
+                <input type="text" class="KeyUpDownHandle" id="ca_certpath" name="ca_certpath">
+                <label for="ca_keypath">Key Path:</label>
+                <input type="text" class="KeyUpDownHandle" id="ca_keypath" name="ca_keypath">
+            </div>
+        </div>
+
+        <div>
+            <label for="algorithm">Algorithm:</label>
+            <select class="ChangeHandle" id="algorithm" name="algorithm">
+                <option value="EC">EC</option>
+                <option value="RSA">RSA</option>
+                <option value="X25519">X25519</option>
+                <option value="ED25519">ED25519</option>
+            </select>
+            <div id="ec_parameters">
+                <label for="ec_curve">Curve:</label>
+                <select class="ChangeHandle" id="ec_curve" name="ec_curve">
+                    <option value="P-256">P-256</option>
+                </select>
+            </div>
+            <div id="rsa_parameters" style="display: none;">
+                <label for="rsa_bits">Bits:</label>
+                <select class="ChangeHandle" id="rsa_bits" name="rsa_bits">
+                    <option value="2048">2048</option>
+                    <option value="4096">4096</option>
+                </select>
+            </div>
+        </div>
+
+        <div>
+            <label for="digest">Digest:</label>
+            <select class="ChangeHandle" id="digest" name="digest">
+                <option value="SHA256">SHA256</option>
+                <option value="SHA1">SHA1</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="commonName">commonName / CN:</label>
+            <input type="text" class="KeyUpDownHandle" id="commonName" name="commonName" placeholder="www.example.com">
+        </div>
+
+        <div>
+            <label for="subjectAltName_IP">subjectAltName IP:</label><br />
+            <textarea class="KeyUpDownHandle" name="subjectAltName_IP" id="subjectAltName_IP" rows="5"
+                cols="40"></textarea>
+            <br />
+            <label for="subjectAltName_DNS">subjectAltName DNS:</label><br />
+            <textarea class="KeyUpDownHandle" name="subjectAltName_DNS" id="subjectAltName_DNS" rows="5"
+                cols="40"></textarea>
+        </div>
+
+        <div>
+            <label for="organizationName">organizationName / O:</label>
+            <input type="text" class="KeyUpDownHandle" id="organizationName" name="organizationName">
+            <br />
+            <label for="organizationalUnitName">organizationalUnitName / OU:</label>
+            <input type="text" class="KeyUpDownHandle" id="organizationalUnitName" name="organizationalUnitName">
+            <br />
+            <label for="countryName">countryName / C:</label>
+            <input type="text" class="KeyUpDownHandle" id="countryName" name="countryName">
+            <br />
+            <label for="stateOrProvinceName">stateOrProvinceName / ST:</label>
+            <input type="text" class="KeyUpDownHandle" id="stateOrProvinceName" name="stateOrProvinceName">
+            <br />
+            <label for="localityName">localityName / L:</label>
+            <input type="text" class="KeyUpDownHandle" id="localityName" name="localityName">
+        </div>
+    </form>
+    <br />
+    <br />
+    <form id='output_form' name='output_form'>
+        <label for="bash_output">Bash script:</label>
+        <br />
+        <textarea name="bash_output" id="bash_output" rows="30" cols="80" readonly></textarea>
+    </form>
+    <script type="text/javascript">
+        if (typeof (String.prototype.trim) === "undefined") {
+            String.prototype.trim = function () {
+                return String(this).replace(/^\s+|\s+$/g, '');
+            };
+        }
+        function genCAConf() {
+            let template = `[ req ]
+encrypt_key        = no
+prompt             = no
+distinguished_name = subject
+x509_extensions    = x509_ext
+string_mask        = utf8only
+
+[ x509_ext ]
+subjectKeyIdentifier   = hash
+authorityKeyIdentifier = keyid:always,issuer
+basicConstraints   = critical, CA:TRUE, pathlen:0
+keyUsage           = critical, digitalSignature, keyEncipherment, cRLSign, keyCertSign
+
+[ subject ]
+`;
+            let sub_O = document.getElementById("organizationName").value.trim();
+            let sub_OU = document.getElementById("organizationalUnitName").value.trim();
+            let sub_CN = document.getElementById("ca_CN").value.trim();
+            if (sub_O.length > 0) {
+                template = template.concat("organizationName = " + sub_O + "\n");
+            }
+            if (sub_OU.length > 0) {
+                template = template.concat("OU               = " + sub_OU + "\n");
+            }
+            if (sub_CN.length === 0) {
+                sub_CN = document.getElementById("ca_CN").placeholder;
+            }
+            template = template.concat("commonName       = " + sub_CN + "\n");
+            return template;
+        }
+        function genServerConf() {
+            let template = `[ req ]
+encrypt_key        = no
+prompt             = no
+distinguished_name = subject
+req_extensions     = req_ext
+string_mask        = utf8only
+
+[ req_ext ]
+subjectKeyIdentifier = hash
+basicConstraints     = CA:FALSE
+keyUsage             = digitalSignature, keyEncipherment
+subjectAltName       = @alternate_names
+nsComment            = "OpenSSL Generated Certificate"
+extendedKeyUsage     = serverAuth
+
+[ subject ]
+`
+            let sub_O = document.getElementById("organizationName").value.trim();
+            let sub_OU = document.getElementById("organizationalUnitName").value.trim();
+            let sub_C = document.getElementById("countryName").value.trim();
+            let sub_ST = document.getElementById("stateOrProvinceName").value.trim();
+            let sub_L = document.getElementById("localityName").value.trim();
+            let sub_CN = document.getElementById("commonName").value.trim();
+            if (sub_O.length > 0) {
+                template = template.concat("organizationName = " + sub_O + "\n");
+            }
+            if (sub_OU.length > 0) {
+                template = template.concat("OU               = " + sub_OU + "\n");
+            }
+            if (sub_C.length > 0) {
+                template = template.concat("C                = " + sub_C + "\n");
+            }
+            if (sub_ST.length > 0) {
+                template = template.concat("ST               = " + sub_ST + "\n");
+            }
+            if (sub_L.length > 0) {
+                template = template.concat("L                = " + sub_L + "\n");
+            }
+            if (sub_CN.length === 0) {
+                sub_CN = document.getElementById("commonName").placeholder;
+            }
+            template = template.concat("commonName       = " + sub_CN + "\n");
+
+            template = template.concat("\n[ alternate_names ]\n");
+            let altname_ips_o = document.getElementById("subjectAltName_IP").value;
+            if (altname_ips_o.length > 0) {
+                let altname_ips = altname_ips_o.match(/[^\r?\n]+/g).map(x => x.trim()).filter(x => x.length > 0);
+                for (const [index, anip] of altname_ips.entries()) {
+                    template = template.concat("IP." + (1 + index).toString() + " = " + anip + "\n");
+                }
+            }
+            let altname_dnss_o = document.getElementById("subjectAltName_DNS").value;
+            if (altname_dnss_o.length > 0) {
+                let altname_dnss = altname_dnss_o.match(/[^\r?\n]+/g).map(x => x.trim()).filter(x => x.length > 0);
+                for (const [index, andns] of altname_dnss.entries()) {
+                    template = template.concat("DNS." + (1 + index).toString() + " = " + andns + "\n");
+                }
+            }
+            return template;
+        }
+        function genEcho(input_withLF, output_filename) {
+            return ("echo '" + input_withLF.substring(0, input_withLF.length - 1) + "' > $GENSSLCERTDIR/" + output_filename + "\n");
+        }
+        function replace_values(template) {
+            let sslbin = document.getElementById("openssl").value.trim();
+            if (sslbin.length === 0) {
+                sslbin = document.getElementById("openssl").placeholder;
+            }
+            template = template.replaceAll("%SSLBIN%", sslbin);
+            template = template.replaceAll("%FORMAT%", document.getElementById("outform").value);
+            template = template.replaceAll("%DIGEST%", document.getElementById("digest").value);
+            template = template.replaceAll("%DAYS%", document.getElementById("days").value);
+            let algorithm_o = document.getElementById("algorithm").value;
+            template = template.replaceAll("%ALGORITHM%", algorithm_o);
+            let sub = "";
+            if (algorithm_o === "EC") {
+                sub = "-pkeyopt ec_paramgen_curve:";
+                sub = sub.concat(document.getElementById("ec_curve").value);
+            } else if (algorithm_o === "RSA") {
+                sub = "-pkeyopt rsa_keygen_bits:";
+                sub = sub.concat(document.getElementById("rsa_bits").value);
+            }
+            template = template.replaceAll("%PKEYOPT%", sub);
+            return template;
+        }
+        function genCACommand() {
+            let template = `%SSLBIN% genpkey -algorithm %ALGORITHM% %PKEYOPT% -outform %FORMAT% -out CA.key
+%SSLBIN% req -config $GENSSLCERTDIR/CA.cnf -new -keyform %FORMAT% -key CA.key -x509 -%DIGEST% -days %DAYS% -outform %FORMAT% -out CA.crt`;
+            return replace_values(template);
+        }
+        function genServerCommand(cacert_path, cakey_path) {
+            let template = `%SSLBIN% genpkey -algorithm %ALGORITHM% %PKEYOPT% -outform %FORMAT% -out server.key
+%SSLBIN% req -config $GENSSLCERTDIR/server.cnf -new -keyform %FORMAT% -key server.key -outform %FORMAT% -out $GENSSLCERTDIR/server.csr
+%SSLBIN% x509 -req -inform %FORMAT% -in $GENSSLCERTDIR/server.csr -CAform %FORMAT% -CA CA.crt -CAkeyform %FORMAT% -CAkey CA.key -CAcreateserial -extensions req_ext -extfile $GENSSLCERTDIR/server.cnf -%DIGEST% -days %DAYS% -outform %FORMAT% -out server.crt`;
+            if (cacert_path.length > 0) {
+                template = template.replaceAll("CA.crt", cacert_path);
+            }
+            if (cakey_path.length > 0) {
+                template = template.replaceAll("CA.key", cakey_path);
+            }
+            return replace_values(template);
+        }
+    </script>
+
+    <script type="text/javascript">
+        var typingTimer;
+        const doneTypingInterval = 640;
+        function doneTyping() {
+            let result = "#!/bin/bash\numask 077\nGENSSLCERTDIR=$(mktemp -d)\n\n";
+            if (document.getElementById("ca").value === "new") {
+                result = result.concat(genEcho(genCAConf(), "CA.cnf"));
+            }
+            result = result.concat(genEcho(genServerConf(), "server.cnf") + "\n");
+            let cacert_path = "";
+            let cakey_path = "";
+            if (document.getElementById("ca").value === "existed") {
+                cacert_path = document.getElementById("ca_certpath").value.trim();
+                cakey_path = document.getElementById("ca_keypath").value.trim();
+            } else {
+                result = result.concat(genCACommand() + "\n\n");
+            }
+            result = result.concat(genServerCommand(cacert_path, cakey_path) + "\n\n");
+            result = result.concat("rm -rf $GENSSLCERTDIR\n")
+            document.getElementById("bash_output").value = result;
+        }
+        function keyup_handle() {
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(doneTyping, doneTypingInterval);
+        }
+        function keydown_handle() {
+            clearTimeout(typingTimer);
+        }
+        document.getElementById("ca").addEventListener('change', (event) => {
+            if (event.target.value === 'new') {
+                document.getElementById("ca_new").style.display = "block";
+                document.getElementById("ca_existed").style.display = "none";
+            } else if (event.target.value === 'existed') {
+                document.getElementById("ca_new").style.display = "none";
+                document.getElementById("ca_existed").style.display = "block";
+            }
+        });
+        document.getElementById("algorithm").addEventListener('change', (event) => {
+            if (event.target.value === 'EC') {
+                document.getElementById("ec_parameters").style.display = "block";
+                document.getElementById("rsa_parameters").style.display = "none";
+            } else if (event.target.value === 'RSA') {
+                document.getElementById("ec_parameters").style.display = "none";
+                document.getElementById("rsa_parameters").style.display = "block";
+            } else {
+                document.getElementById("ec_parameters").style.display = "none";
+                document.getElementById("rsa_parameters").style.display = "none";
+            }
+        });
+        Array.from(document.getElementsByClassName("KeyUpDownHandle")).forEach(function (element) {
+            element.addEventListener('keyup', keyup_handle);
+            element.addEventListener('keydown', keydown_handle);
+        });
+        Array.from(document.getElementsByClassName("ChangeHandle")).forEach(function (element) {
+            element.addEventListener('change', keyup_handle);
+        });
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById("jsprompt").remove();
+        }, false);
+    </script>
+</body>
+
+</html>
