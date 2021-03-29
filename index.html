@@ -265,7 +265,7 @@ extendedKeyUsage     = serverAuth
             document.body.appendChild(a);
             a.style = "display: none";
             let json = JSON.stringify(data);
-            let blob = new Blob([data], {type: "text/plain;charset=utf-8"});
+            let blob = new Blob([data], { type: "text/plain;charset=utf-8" });
             let url = window.URL.createObjectURL(blob);
             a.href = url;
             a.download = fileName;
