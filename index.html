@@ -288,7 +288,7 @@ extendedKeyUsage     = serverAuth
         var typingTimer;
         const doneTypingInterval = 640;
         function doneTyping() {
-            let result = "#!/bin/bash\numask 077\nGENSSLCERTDIR=$(mktemp -d)\n\n";
+            let result = "#!/bin/bash\nset -e\numask 077\nGENSSLCERTDIR=$(mktemp -d)\n\n";
             if (document.getElementById("ca").value === "new") {
                 result = result.concat(genEcho(genCAConf(), "CA.cnf"));
             }
