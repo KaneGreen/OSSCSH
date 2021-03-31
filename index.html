@@ -60,14 +60,40 @@
             <div id="ec_parameters">
                 <label for="ec_curve">Curve:</label>
                 <select class="ChangeHandle" id="ec_curve" name="ec_curve">
-                    <option value="P-256">P-256</option>
+                    <option value="sect163k1">sect163k1 / NIST K-163</option>
+                    <option value="sect163r1">sect163r1</option>
+                    <option value="sect163r2">sect163r2 / NIST B-163</option>
+                    <option value="sect193r1">sect193r1</option>
+                    <option value="sect193r2">sect193r2</option>
+                    <option value="sect233k1">sect233k1 / NIST K-233</option>
+                    <option value="sect233r1">sect233r1 / NIST B-233</option>
+                    <option value="sect239k1">sect239k1</option>
+                    <option value="sect283k1">sect283k1 / NIST K-283</option>
+                    <option value="sect283r1">sect283r1 / NIST B-283</option>
+                    <option value="sect409k1">sect409k1 / NIST K-409</option>
+                    <option value="sect409r1">sect409r1 / NIST B-409</option>
+                    <option value="sect571k1">sect571k1 / NIST K-571</option>
+                    <option value="sect571r1">sect571r1 / NIST B-571</option>
+                    <option value="secp160k1">secp160k1</option>
+                    <option value="secp160r1">secp160r1</option>
+                    <option value="secp160r2">secp160r2</option>
+                    <option value="secp192k1">secp192k1</option>
+                    <option value="prime192v1">secp192r1 / prime192v1 / NIST P-192</option>
+                    <option value="secp224k1">secp224k1</option>
+                    <option value="secp224r1">secp224r1 / NIST P-224</option>
+                    <option value="secp256k1">secp256k1</option>
+                    <option value="prime256v1" selected>secp256r1 / prime256v1 / NIST P-256</option>
+                    <option value="secp384r1">secp384r1 / NIST P-384</option>
+                    <option value="secp521r1">secp521r1 / NIST P-521</option>
                 </select>
             </div>
             <div id="rsa_parameters" style="display: none;">
                 <label for="rsa_bits">Bits:</label>
                 <select class="ChangeHandle" id="rsa_bits" name="rsa_bits">
                     <option value="2048">2048</option>
+                    <option value="3072">3072</option>
                     <option value="4096">4096</option>
+                    <option value="8192">8192 (Not Recommended)</option>
                 </select>
             </div>
         </div>
@@ -75,8 +101,9 @@
         <div>
             <label for="digest">Digest:</label>
             <select class="ChangeHandle" id="digest" name="digest">
-                <option value="SHA256">SHA256</option>
                 <option value="SHA1">SHA1</option>
+                <option value="SHA256" selected>SHA256</option>
+                <option value="SHA512">SHA512</option>
             </select>
         </div>
         <br />
