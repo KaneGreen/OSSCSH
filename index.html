@@ -128,9 +128,6 @@
             <label for="organizationName">organizationName / O:</label>
             <input type="text" class="KeyUpDownHandle" id="organizationName" name="organizationName">
             <br />
-            <label for="organizationalUnitName">organizationalUnitName / OU:</label>
-            <input type="text" class="KeyUpDownHandle" id="organizationalUnitName" name="organizationalUnitName">
-            <br />
             <label for="countryName">countryName / C:</label>
             <input type="text" class="KeyUpDownHandle" id="countryName" name="countryName">
             <br />
@@ -172,13 +169,9 @@ keyUsage           = critical, digitalSignature, keyEncipherment, cRLSign, keyCe
 [ subject ]
 `;
             let sub_O = document.getElementById("organizationName").value.trim();
-            let sub_OU = document.getElementById("organizationalUnitName").value.trim();
             let sub_CN = document.getElementById("ca_CN").value.trim();
             if (sub_O.length > 0) {
                 template = template.concat("organizationName = " + sub_O + "\n");
-            }
-            if (sub_OU.length > 0) {
-                template = template.concat("OU               = " + sub_OU + "\n");
             }
             if (sub_CN.length === 0) {
                 sub_CN = document.getElementById("ca_CN").placeholder;
@@ -205,16 +198,12 @@ extendedKeyUsage     = serverAuth
 [ subject ]
 `
             let sub_O = document.getElementById("organizationName").value.trim();
-            let sub_OU = document.getElementById("organizationalUnitName").value.trim();
             let sub_C = document.getElementById("countryName").value.trim();
             let sub_ST = document.getElementById("stateOrProvinceName").value.trim();
             let sub_L = document.getElementById("localityName").value.trim();
             let sub_CN = document.getElementById("commonName").value.trim();
             if (sub_O.length > 0) {
                 template = template.concat("organizationName = " + sub_O + "\n");
-            }
-            if (sub_OU.length > 0) {
-                template = template.concat("OU               = " + sub_OU + "\n");
             }
             if (sub_C.length > 0) {
                 template = template.concat("C                = " + sub_C + "\n");
