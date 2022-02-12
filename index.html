@@ -8,7 +8,7 @@
 
 <body>
     <h1>OpenSSL Self-signed Certificate Script Helper</h1>
-    <h3 id="jsprompt">Notice: this page uses JavaScript, please enable it.</h3>
+    <noscript><h3>Notice: this page uses JavaScript, please enable it.</h3></noscript>
     <form id='input_form' name='input_form'>
         <div>
             <label for="openssl">Path for OpenSSL binary:</label>
@@ -355,9 +355,6 @@ extendedKeyUsage     = serverAuth
         Array.from(document.getElementsByClassName("ChangeHandle")).forEach(function (element) {
             element.addEventListener('change', keyup_handle);
         });
-        document.addEventListener('DOMContentLoaded', function () {
-            document.getElementById("jsprompt").remove();
-        }, false);
     </script>
 </body>
 
