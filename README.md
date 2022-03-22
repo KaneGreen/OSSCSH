@@ -10,8 +10,8 @@ This tool is still in early development (prototype) and has not undergone
 strict code audits. Do not use for serious purposes.
 
 ## Contribution
-1. Any contribution intentionally submitted for inclusion in openssl-src by
-  you, as defined in the Apache-2.0 license, shall be dual licensed as
+1. Any contribution intentionally submitted for inclusion in this repository
+  by you, as defined in the Apache-2.0 license, shall be dual licensed as
   above, without any additional terms or conditions.
 2. This code was not written by trained front-end programmers. If this code
   offends you, please forgive me.
